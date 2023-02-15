@@ -18,9 +18,9 @@ const io = new Server(server, {
     }
 });
 
-app.use('/', (req, res) => {
-    return res.json({ status: 'Ok, prueba 3' })
-});
+// app.use('/', (req, res) => {
+//     return res.json({ status: 'Ok, prueba 3' })
+// });
 
 io.on("connection", (socket) => {
     console.log(socket);
