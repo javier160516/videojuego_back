@@ -6,7 +6,12 @@ const app = express();
 const server = createServer();
 
 const io = new Server();
-io.attach(server);
+io.attach(server, {
+    cors: {
+        origin: "https://127.0.0.1:5173",
+        methods: ["GET", "POST"]
+    }
+});
 
 app.use('/', (req, res) => {
     return res.json({status: 'Ok'})
