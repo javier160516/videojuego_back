@@ -17,7 +17,7 @@ app.use('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    console.log('Alguien se ha conectado...', socket.id);
+    socket.emit('message', {saludo: 'Holaaaa'});
 })
 
 const PORT = process.env.PORT || 3000;
