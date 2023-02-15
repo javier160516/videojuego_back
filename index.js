@@ -1,30 +1,23 @@
 import express from 'express';
-import { createServer } from 'http';
-import cors from 'cors';
+import httpServer from 'http';
 import { Server } from 'socket.io';
 
 const app = express();
-const server = createServer();
-app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
+const server = httpServer.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: "https://127.0.0.1:5173",
+        origin: ["http://127.0.0.1:5173"],
         credentials: true
     }
 });
 
-// app.use('/', (req, res) => {
-//     return res.json({ status: 'Ok, prueba 3' })
-// });
+app.use('/', (req, res) => {
+    return res.json({status: 'Ok'})
+});
 
-io.on("connection", (socket) => {
-    console.log(socket);
-    console.log('Conectado...');
+io.on('connection', (socket) => {
+    console.log('Alguien se ha conectado...', socket.id);
 })
 
 const PORT = process.env.PORT || 3000;
