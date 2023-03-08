@@ -2,35 +2,42 @@ import { validationResult, check } from "express-validator"
 import { Problema, Imagenes, Respuestas } from '../models/index.js';
 
 const getProblemas = async (req, res) => {
-    const problemas = await Problema.findAll();
-    const imagenes = await Imagenes.findAll();
-    const respuestas = await Respuestas.findAll();
+    try {
+        const problemas = await Problema.findAll();
+        const imagenes = await Imagenes.findAll();
+        const respuestas = await Respuestas.findAll();
 
-    const problemasCompleto = [];
-    Object.values(problemas).forEach(problema => {
-        Object.values(imagenes).forEach(imagen => {
-            Object.values(respuestas).forEach(respuesta => {
-                if(problema.id == imagen.id && problema.id == respuesta.id){
+        const problemasCompleto = [];
+        Object.values(problemas).forEach(problema => {
+            Object.values(imagenes).forEach(imagen => {
+                Object.values(respuestas).forEach(respuesta => {
+                    if (problema.id == imagen.id && problema.id == respuesta.id) {
 
-                    problemasCompleto.push({
-                        id: problema.id,
-                        planteamiento: problema.planteamiento,
-                        imagenes: {
-                            nombre: imagen.nombre,
-                            path: imagen.path,
-                            mimetype: imagen.mimetype,
-                        },
-                        respuesta: respuesta.opcion
-                    });
-                }
+                        problemasCompleto.push({
+                            id: problema.id,
+                            planteamiento: problema.planteamiento,
+                            imagenes: {
+                                nombre: imagen.nombre,
+                                path: imagen.path,
+                                mimetype: imagen.mimetype,
+                            },
+                            respuesta: respuesta.opcion
+                        });
+                    }
+                });
             });
         });
-    });
- 
-    return res.status(200).json({
-        status: 200,
-        data: problemasCompleto
-    })
+
+        return res.status(200).json({
+            status: 200,
+            data: problemasCompleto
+        })
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            msg: 'Ha ocurrido un error'
+        })
+    }
 }
 
 const registrarPregunta = async (req, res) => {
