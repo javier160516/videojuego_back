@@ -1,6 +1,6 @@
 import express from 'express';
+import { getProblemas, guardarImagen, registrarPregunta } from '../controllers/gameController.js';
 import upload from '../middleware/uploadImage.js';
-import { registrarPregunta, guardarImagen, getProblemas } from '../controllers/gameController.js';
 
 const router = express.Router();
 

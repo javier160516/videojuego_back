@@ -1,7 +1,7 @@
 import { exit } from 'node:process'
-import db from "../config/db.js";
+import db from "../../config/db.js";
 import personajes from './Personajes.js';
-import Personaje from '../models/Personajes.js';
+import Personaje from '../../models/Personajes.js';
 
 const importarDatos = async () => {
     try {

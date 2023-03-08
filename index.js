@@ -1,9 +1,9 @@
 import express from 'express';
 import httpServer from 'http';
 import { Server } from 'socket.io';
-import db from './config/db.js';
+import db from './src/config/db.js';
 import cors from 'cors';
-import gameRoutes from './routes/gameRoutes.js';
+import gameRoutes from './src/routes/gameRoutes.js';
 
 const app = express();
 app.use(express.urlencoded({extended: true}));
