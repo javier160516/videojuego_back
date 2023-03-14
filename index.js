@@ -4,6 +4,8 @@ import { Server } from 'socket.io';
 import db from './src/config/db.js';
 import cors from 'cors';
 import gameRoutes from './src/routes/gameRoutes.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 app.use(express.urlencoded({extended: true}));
@@ -26,8 +28,12 @@ const io = new Server(server, {
 });
 
 //Carpeta publica
-app.use(express.static('public'));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+console.log(__dirname);
+// app.use('/public', express.static(path.join(__dirname ,'public')));
+app.use('public', express.static(path.join(__dirname, 'public')));
 app.use('/', gameRoutes);
+
 
 io.on('connection', (socket) => {
     console.log(`Usuario ${socket.id} conectado`);
