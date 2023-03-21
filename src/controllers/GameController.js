@@ -1,7 +1,5 @@
 import { validationResult, check } from "express-validator"
 import { Problema, Imagenes, Respuestas } from '../models/index.js';
-import path from 'path'
-import { fileURLToPath } from 'url';
 import db from "../config/db.js";
 import { QueryTypes } from "sequelize";
 
