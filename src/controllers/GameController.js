@@ -1,38 +1,44 @@
 import { validationResult, check } from "express-validator"
 import { Problema, Imagenes, Respuestas } from '../models/index.js';
+import path from 'path'
+import { fileURLToPath } from 'url';
+import db from "../config/db.js";
+import { QueryTypes } from "sequelize";
 
 const getProblemas = async (req, res) => {
     try {
-        const problemas = await Problema.findAll();
-        const imagenes = await Imagenes.findAll();
-        const respuestas = await Respuestas.findAll();
+        // const problemas = await Problema.findAll();
+        // const imagenes = await Imagenes.findAll();
+        // const respuestas = await Respuestas.findAll();
 
-        const problemasCompleto = [];
+        const problemas = await db.query(`
+            SELECT p.id, p.planteamiento, i.nombre, i.path, i.mimetype, r.opcion
+            FROM problemas as p
+            INNER JOIN imagenes as i ON i.id_problema = p.id
+            INNER JOIN respuestas as r ON r.id_problema = p.id
+        `, { type: QueryTypes.SELECT });
+
+        const newArrayProblemas = [];
         Object.values(problemas).forEach(problema => {
-            Object.values(imagenes).forEach(imagen => {
-                Object.values(respuestas).forEach(respuesta => {
-                    if (problema.id == imagen.id && problema.id == respuesta.id) {
-
-                        problemasCompleto.push({
-                            id: problema.id,
-                            planteamiento: problema.planteamiento,
-                            imagenes: {
-                                nombre: imagen.nombre,
-                                path: imagen.path,
-                                mimetype: imagen.mimetype,
-                            },
-                            respuesta: respuesta.opcion
-                        });
-                    }
-                });
-            });
+            const problemaObjeto = {
+                id: problema.id,
+                planteamiento: problema.planteamiento,
+                imagenes: {
+                    nombre: problema.nombre,
+                    path: problema.path,
+                    mimetype: problema.mimetype
+                },
+                opcion: problema.opcion
+            }
+            newArrayProblemas.push(problemaObjeto);
         });
 
         return res.status(200).json({
             status: 200,
-            data: problemasCompleto
+            data: newArrayProblemas
         })
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             status: 500,
             msg: 'Ha ocurrido un error'
@@ -102,7 +108,7 @@ const guardarImagen = async (req, res) => {
 
     req.files.forEach(file => {
         const { path, filename, mimetype } = file;
-        arrayPathFiles.push(path);
+        arrayPathFiles.push(`${path}`);
         arrayNameFiles.push(filename);
         arrayMimetypesFiles.push(mimetype);
     });
@@ -122,4 +128,27 @@ const guardarImagen = async (req, res) => {
     });
 }
 
-export { getProblemas, registrarPregunta, guardarImagen }
+const deleteQuestion = async (req, res) => {
+    const {id} = req.params;
+    const question = await Problema.findOne({where: {id}});
+        if(!question){
+            return res.status(404).json({
+                status: 404,
+                msg: 'Pregunta no encontrada'
+            });
+        }
+    try {
+        await Problema.destroy({where: {id}});
+        return res.status(200).json({
+            status: 200,
+            msg: 'Problema eliminado correctamente'
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            msg: 'No hemos podido eliminar el registro'
+        });
+    }
+}
+
+export { getProblemas, registrarPregunta, guardarImagen, deleteQuestion }

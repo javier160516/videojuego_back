@@ -28,11 +28,13 @@ const io = new Server(server, {
 });
 
 //Carpeta publica
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-console.log(__dirname);
-// app.use('/public', express.static(path.join(__dirname ,'public')));
-app.use('public', express.static(path.join(__dirname, 'public')));
 app.use('/', gameRoutes);
+app.use(express.static('/public/uploads'));
+app.get('/public/uploads/:img', (req, res) => {
+    const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+    res.sendFile(`${__dirname}/public/uploads/${req.params.img}`);
+});
 
 
 io.on('connection', (socket) => {
