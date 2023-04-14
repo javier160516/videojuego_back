@@ -4,15 +4,15 @@ import db from "../config/db.js";
 import { QueryTypes } from "sequelize";
 
 const getProblemas = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
     try {
         // const problemas = await Problema.findAll();
         // const imagenes = await Imagenes.findAll();
         // const respuestas = await Respuestas.findAll();
 
         const problemas = await db.query(`
-            SELECT p.id, p.planteamiento, i.nombre, i.path, i.mimetype, r.opcion
+            SELECT p.id, p.planteamiento, p.opciones, r.opcion
             FROM problemas as p
-            INNER JOIN imagenes as i ON i.id_problema = p.id
             INNER JOIN respuestas as r ON r.id_problema = p.id
         `, { type: QueryTypes.SELECT });
 
@@ -21,11 +21,7 @@ const getProblemas = async (req, res) => {
             const problemaObjeto = {
                 id: problema.id,
                 planteamiento: problema.planteamiento,
-                imagenes: {
-                    nombre: problema.nombre,
-                    path: problema.path,
-                    mimetype: problema.mimetype
-                },
+                respuestas: problema.opciones,
                 opcion: problema.opcion
             }
             newArrayProblemas.push(problemaObjeto);
@@ -46,7 +42,10 @@ const getProblemas = async (req, res) => {
 
 const registrarPregunta = async (req, res) => {
     await check('problem').notEmpty().withMessage('El campo es obligatorio').run(req);
+    await check('answers').notEmpty().withMessage('Las respuestas son obligatorias').run(req);
     await check('correct').notEmpty().withMessage('El campo es obligatorio').run(req);
+
+    console.log(req.body);
 
     let result = validationResult(req);
     let errors = {};
@@ -55,7 +54,7 @@ const registrarPregunta = async (req, res) => {
         if (param == 'problem') {
             errors = { ...errors, problem: msg }
         }
-        if (param == 'options') {
+        if (param == 'answers') {
             errors = { ...errors, options: msg }
         }
         if (param == 'correct') {
@@ -70,11 +69,12 @@ const registrarPregunta = async (req, res) => {
         });
     }
 
-    const { problem, correct: correctAnswer } = req.body
+    const { problem, answers, correct: correctAnswer } = req.body
 
     try {
         const problema = await Problema.create({
-            planteamiento: problem
+            planteamiento: problem,
+            opciones: JSON.stringify(answers)
         });
 
         const { id } = problema;
@@ -98,33 +98,33 @@ const registrarPregunta = async (req, res) => {
     }
 }
 
-const guardarImagen = async (req, res) => {
-    console.log(req.params);
-    const arrayPathFiles = [];
-    const arrayNameFiles = [];
-    const arrayMimetypesFiles = [];
+// const guardarImagen = async (req, res) => {
+//     console.log(req.params);
+//     const arrayPathFiles = [];
+//     const arrayNameFiles = [];
+//     const arrayMimetypesFiles = [];
 
-    req.files.forEach(file => {
-        const { path, filename, mimetype } = file;
-        arrayPathFiles.push(`${path}`);
-        arrayNameFiles.push(filename);
-        arrayMimetypesFiles.push(mimetype);
-    });
+//     req.files.forEach(file => {
+//         const { path, filename, mimetype } = file;
+//         arrayPathFiles.push(`${path}`);
+//         arrayNameFiles.push(filename);
+//         arrayMimetypesFiles.push(mimetype);
+//     });
 
-    const { id } = req.params;
+//     const { id } = req.params;
 
-    const imagenes = await Imagenes.create({
-        nombre: JSON.stringify(arrayNameFiles),
-        path: JSON.stringify(arrayPathFiles),
-        mimetype: JSON.stringify(arrayMimetypesFiles),
-        id_problema: id
-    });
+//     const imagenes = await Imagenes.create({
+//         nombre: JSON.stringify(arrayNameFiles),
+//         path: JSON.stringify(arrayPathFiles),
+//         mimetype: JSON.stringify(arrayMimetypesFiles),
+//         id_problema: id
+//     });
 
-    return res.status(201).json({
-        status: 201,
-        msg: 'Pregunta creada correctamente'
-    });
-}
+//     return res.status(201).json({
+//         status: 201,
+//         msg: 'Pregunta creada correctamente'
+//     });
+// }
 
 const deleteQuestion = async (req, res) => {
     const {id} = req.params;
@@ -149,4 +149,4 @@ const deleteQuestion = async (req, res) => {
     }
 }
 
-export { getProblemas, registrarPregunta, guardarImagen, deleteQuestion }
+export { getProblemas, registrarPregunta, deleteQuestion }
