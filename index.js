@@ -1,11 +1,11 @@
 import express from 'express';
 import httpServer from 'http';
 import { Server } from 'socket.io';
-import db from './src/config/db.js';
+// import db from './src/config/db.js';
 import cors from 'cors';
-import gameRoutes from './src/routes/gameRoutes.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+// import gameRoutes from './src/routes/gameRoutes.js';
+// import path from 'path';
+// import { fileURLToPath } from 'url';
 import ngrok from 'ngrok';
 
 
