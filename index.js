@@ -20,12 +20,12 @@ app.use(express.urlencoded({ extended: true }));
 
 
 //Conexion a la base de datos
-try {
-    await db.authenticate();
-    db.sync();
-} catch (error) {
-    console.log(error)
-}
+// try {
+//     await db.authenticate();
+//     db.sync();
+// } catch (error) {
+//     console.log(error)
+// }
 const server = httpServer.createServer(app);
 
 const io = new Server(server, {
@@ -43,13 +43,13 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use('/', gameRoutes);
-app.use(express.static('/public/uploads'));
-app.get('/public/uploads/:img', (req, res) => {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    res.sendFile(`${__dirname}/public/uploads/${req.params.img}`);
-});
+// app.use('/', gameRoutes);
+// app.use(express.static('/public/uploads'));
+// app.get('/public/uploads/:img', (req, res) => {
+//     const __filename = fileURLToPath(import.meta.url);
+//     const __dirname = path.dirname(__filename);
+//     res.sendFile(`${__dirname}/public/uploads/${req.params.img}`);
+// });
 
 
 io.on('connection', (socket) => {
