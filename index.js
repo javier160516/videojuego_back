@@ -79,12 +79,11 @@ io.on("connection", (socket) => {
     socket.on("aliases", ({ alias }) => {
       console.log(`El usuario ${alias} está conectado a la sala ${room}`);
       aliases.push(alias);
-      if(usersInRoom.length == 2){
-          io.to(room).emit("connectedInRoom", {
-            message: `El usuario ${alias} está conectado a la sala ${room}`,
-            data: usersInRoom.length,
-          });
-      }
+
+      io.to(room).emit("connectedInRoom", {
+        message: `El usuario ${alias} está conectado a la sala ${room}`,
+        data: usersInRoom.length,
+      });
     });
     // socket.data.username = user.alias;
     // const users = [];
