@@ -66,7 +66,7 @@ io.on("connection", (socket) => {
   console.log(`Usuario ${socket.id} conectado`);
 
   // mandar token...
-  if(usersInfo.length > 2){
+  if(usersInfo.length <= 2){
 
     socket.on("join", async (room) => {
       console.log(`Socket ${socket.id} joining ${room}`);
