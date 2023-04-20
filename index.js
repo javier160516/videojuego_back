@@ -58,78 +58,66 @@ app.use(function (req, res, next) {
 //   res.sendFile(`${__dirname}/public/uploads/${req.params.img}`);
 // });
 
+let usersInfo = [];
+let roomActual = '';
 io.on("connection", (socket) => {
   let aliases = [];
   let usersInRoom = [];
   console.log(`Usuario ${socket.id} conectado`);
-  const usersActive = socket.client.conn.server.clientsCount;
+
   // mandar token...
-  socket.on("join", async (room) => {
-    console.log(`Socket ${socket.id} joining ${room}`);
-    socket.join(room);
-    console.log(io.sockets.adapter.rooms, " desde rooms");
-    // console.log(io.sockets, ' desde rooms');
-    // console.log(, ' desde rooms');
-    await (
-      await io.in(room).allSockets()
-    ).forEach((user) => {
-      usersInRoom.push(user);
-    });
+  if(usersInfo.length > 2){
 
-    socket.on("aliases", ({ alias }) => {
-      console.log(`El usuario ${alias} está conectado a la sala ${room}`);
-      aliases.push(alias);
-
-      io.to(room).emit("connectedInRoom", {
-        message: `El usuario ${alias} está conectado a la sala ${room}`,
-        data: usersInRoom.length,
+    socket.on("join", async (room) => {
+      console.log(`Socket ${socket.id} joining ${room}`);
+      socket.join(room);
+      roomActual = room;
+  
+      // SE ENVIA EL ID AL FRONTEND
+      socket.broadcast.to(socket.id).emit('getId', socket.id);
+  
+      console.log(io.sockets.adapter.rooms, " desde rooms");
+      // console.log(io.sockets, ' desde rooms');
+      // console.log(, ' desde rooms');
+      await (
+        await io.in(room).allSockets()
+      ).forEach((user) => {
+        usersInRoom.push(user);
+      });
+  
+      socket.on("aliases", ({ alias }) => {
+        console.log(`El usuario ${alias} está conectado a la sala ${room}`);
+        aliases.push(alias);
+  
+        io.to(room).emit("connectedInRoom", {
+          message: `El usuario ${alias} está conectado a la sala ${room}`,
+          data: usersInRoom.length,
+        });
+  
+        // usersInfo.push({id: socket.id, name: alias});
+        sendUsers({ id: socket.id, name: alias });
+        // console.log(usersInfo, ' desde usersInfo')
       });
     });
-    // socket.data.username = user.alias;
-    // const users = [];
+  }
 
-    // for (let [id, socket] of io.of('/').sockets) {
-    //     users.push({
-    //         userID: id,
-    //         username: socket.data['username'] !== undefined ? socket.data.username : `Usuario invitado ${id}`
-    //     });
+  const sendUsers = (data) => {
+    usersInfo.push(data);
+    console.log(usersInfo, " desde sendUsers");
+    // if(usersInfo.length <= 2){
+      io.in(roomActual).emit("aliasesPlayers", usersInfo);
     // }
-    // socket.emit('connectedInRoom', users);
-    // socket.emit('message', 'Esperando Jugador...');
+  };
 
-    // if (usersActive === 1) {
-    //     socket.emit('waiting', { status: true, message: 'Esperando a otro jugador' });
-    // } else {
-    //     console.log(user, ' desde users');
-    //     io.sockets.emit('waiting', { status: false, message: '' });
-    //     socket.on('join', async user => {
-    //         socket.user = { ...user, id: socket.client.id };
-    //         const avatars = await Personaje.findAll();
-    //         let newAvatars = [];
-    //         avatars.forEach(avatar => {
-    //             newAvatars.push(avatar)
-    //         });
-    //         socket.emit('select-avatar', { user: socket.user, usersActive, connection: true, avatars: newAvatars });
-    //     });
-    // }
-  });
-  // if (usersActive <= 2) {
-  //     socket.on('join', async user => {
-  //         socket.user = { ...user, id: socket.client.id };
-  //         const avatars = await Personaje.findAll();
-  //         let newAvatars = [];
-  //         avatars.forEach(avatar => {
-  //             newAvatars.push(avatar)
-  //         });
-  //         socket.emit('select-avatar', { user: socket.user, usersActive, connection: true, avatars: newAvatars });
-  //     });
-  // } else {
-  //     socket.emit('error', { message: 'No hay más espacios' });
-  //     console.log('No hay mas espacios');
-  // }
+  const filterUsers = (id) => {
+    const newUsersInfo = usersInfo.filter((user) => user.id != id);
+    console.log(newUsersInfo, " desde filterUsers");
+    usersInRoom = newUsersInfo;
+  };
 
   socket.on("disconnect", () => {
     console.log(`Usuario ${socket.id} desconectado`);
+    filterUsers(socket.id);
     socket.emit("disconnected", { status: false });
   });
 });
